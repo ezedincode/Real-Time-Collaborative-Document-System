@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+/* App layout: full-screen editor */
+body {
+  @apply min-h-screen bg-slate-100 antialiased;
+}
+
+#app {
+  @apply min-h-screen;
+}

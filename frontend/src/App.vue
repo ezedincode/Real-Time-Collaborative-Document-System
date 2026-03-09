@@ -1,12 +1,19 @@
 <template>
-  <div class="editor-container">
+  <div class="min-h-screen w-full border border-slate-200 rounded-none overflow-hidden bg-white">
     <!-- Toolbar -->
-    <div v-if="editor" class="toolbar">
+    <div
+      v-if="editor"
+      class="flex flex-wrap gap-1 p-2 bg-slate-50 border-b border-slate-200"
+    >
       <!-- Text Formatting -->
       <button
         @click="editor.chain().focus().toggleBold().run()"
-        :class="{ 'is-active': editor.isActive('bold') }"
-        class="toolbar-btn"
+        :class="[
+          toolbarButtonBaseClasses,
+          editor.isActive('bold')
+            ? toolbarButtonActiveClasses
+            : toolbarButtonInactiveClasses,
+        ]"
         title="Bold"
       >
         <strong>B</strong>
@@ -14,8 +21,12 @@
       
       <button
         @click="editor.chain().focus().toggleItalic().run()"
-        :class="{ 'is-active': editor.isActive('italic') }"
-        class="toolbar-btn"
+        :class="[
+          toolbarButtonBaseClasses,
+          editor.isActive('italic')
+            ? toolbarButtonActiveClasses
+            : toolbarButtonInactiveClasses,
+        ]"
         title="Italic"
       >
         <em>I</em>
@@ -23,20 +34,28 @@
       
       <button
         @click="editor.chain().focus().toggleStrike().run()"
-        :class="{ 'is-active': editor.isActive('strike') }"
-        class="toolbar-btn"
+        :class="[
+          toolbarButtonBaseClasses,
+          editor.isActive('strike')
+            ? toolbarButtonActiveClasses
+            : toolbarButtonInactiveClasses,
+        ]"
         title="Strikethrough"
       >
         <s>S</s>
       </button>
       
-      <span class="separator"></span>
+      <span class="w-px bg-slate-300 mx-1 self-stretch"></span>
       
       <!-- Headings -->
       <button
         @click="editor.chain().focus().toggleHeading({ level: 1 }).run()"
-        :class="{ 'is-active': editor.isActive('heading', { level: 1 }) }"
-        class="toolbar-btn"
+        :class="[
+          toolbarButtonBaseClasses,
+          editor.isActive('heading', { level: 1 })
+            ? toolbarButtonActiveClasses
+            : toolbarButtonInactiveClasses,
+        ]"
         title="Heading 1"
       >
         H1
@@ -44,8 +63,12 @@
       
       <button
         @click="editor.chain().focus().toggleHeading({ level: 2 }).run()"
-        :class="{ 'is-active': editor.isActive('heading', { level: 2 }) }"
-        class="toolbar-btn"
+        :class="[
+          toolbarButtonBaseClasses,
+          editor.isActive('heading', { level: 2 })
+            ? toolbarButtonActiveClasses
+            : toolbarButtonInactiveClasses,
+        ]"
         title="Heading 2"
       >
         H2
@@ -53,20 +76,28 @@
       
       <button
         @click="editor.chain().focus().toggleHeading({ level: 3 }).run()"
-        :class="{ 'is-active': editor.isActive('heading', { level: 3 }) }"
-        class="toolbar-btn"
+        :class="[
+          toolbarButtonBaseClasses,
+          editor.isActive('heading', { level: 3 })
+            ? toolbarButtonActiveClasses
+            : toolbarButtonInactiveClasses,
+        ]"
         title="Heading 3"
       >
         H3
       </button>
       
-      <span class="separator"></span>
+      <span class="w-px bg-slate-300 mx-1 self-stretch"></span>
       
       <!-- Lists -->
       <button
         @click="editor.chain().focus().toggleBulletList().run()"
-        :class="{ 'is-active': editor.isActive('bulletList') }"
-        class="toolbar-btn"
+        :class="[
+          toolbarButtonBaseClasses,
+          editor.isActive('bulletList')
+            ? toolbarButtonActiveClasses
+            : toolbarButtonInactiveClasses,
+        ]"
         title="Bullet List"
       >
         • List
@@ -74,20 +105,28 @@
       
       <button
         @click="editor.chain().focus().toggleOrderedList().run()"
-        :class="{ 'is-active': editor.isActive('orderedList') }"
-        class="toolbar-btn"
+        :class="[
+          toolbarButtonBaseClasses,
+          editor.isActive('orderedList')
+            ? toolbarButtonActiveClasses
+            : toolbarButtonInactiveClasses,
+        ]"
         title="Numbered List"
       >
         1. List
       </button>
       
-      <span class="separator"></span>
+      <span class="w-px bg-slate-300 mx-1 self-stretch"></span>
       
       <!-- Alignment -->
       <button
         @click="editor.chain().focus().setTextAlign('left').run()"
-        :class="{ 'is-active': editor.isActive({ textAlign: 'left' }) }"
-        class="toolbar-btn"
+        :class="[
+          toolbarButtonBaseClasses,
+          editor.isActive({ textAlign: 'left' })
+            ? toolbarButtonActiveClasses
+            : toolbarButtonInactiveClasses,
+        ]"
         title="Align Left"
       >
         ←
@@ -95,8 +134,12 @@
       
       <button
         @click="editor.chain().focus().setTextAlign('center').run()"
-        :class="{ 'is-active': editor.isActive({ textAlign: 'center' }) }"
-        class="toolbar-btn"
+        :class="[
+          toolbarButtonBaseClasses,
+          editor.isActive({ textAlign: 'center' })
+            ? toolbarButtonActiveClasses
+            : toolbarButtonInactiveClasses,
+        ]"
         title="Align Center"
       >
         ↔
@@ -104,20 +147,24 @@
       
       <button
         @click="editor.chain().focus().setTextAlign('right').run()"
-        :class="{ 'is-active': editor.isActive({ textAlign: 'right' }) }"
-        class="toolbar-btn"
+        :class="[
+          toolbarButtonBaseClasses,
+          editor.isActive({ textAlign: 'right' })
+            ? toolbarButtonActiveClasses
+            : toolbarButtonInactiveClasses,
+        ]"
         title="Align Right"
       >
         →
       </button>
       
-      <span class="separator"></span>
+      <span class="w-px bg-slate-300 mx-1 self-stretch"></span>
       
       <!-- Undo/Redo -->
       <button
         @click="editor.chain().focus().undo().run()"
         :disabled="!editor.can().undo()"
-        class="toolbar-btn"
+        :class="[toolbarButtonBaseClasses, toolbarButtonInactiveClasses]"
         title="Undo"
       >
         ↩
@@ -126,7 +173,7 @@
       <button
         @click="editor.chain().focus().redo().run()"
         :disabled="!editor.can().redo()"
-        class="toolbar-btn"
+        :class="[toolbarButtonBaseClasses, toolbarButtonInactiveClasses]"
         title="Redo"
       >
         ↪
@@ -134,21 +181,27 @@
     </div>
     
     <!-- Editor Content -->
-    <editor-content :editor="editor" class="editor-content" />
+    <editor-content
+      :editor="editor"
+      class="min-h-[300px] p-4 outline-none"
+    />
     
     <!-- Document Status Bar -->
-    <div v-if="editor" class="status-bar">
-      <div class="status-item">
-        <span class="status-label">Words:</span>
-        <span class="status-value">{{ wordCount }}</span>
+    <div
+      v-if="editor"
+      class="flex gap-6 px-4 py-2 bg-slate-50 border-t border-slate-200 text-xs"
+    >
+      <div class="flex gap-2 items-center">
+        <span class="text-slate-500 font-medium">Words:</span>
+        <span class="text-slate-900 font-semibold">{{ wordCount }}</span>
       </div>
-      <div class="status-item">
-        <span class="status-label">Characters:</span>
-        <span class="status-value">{{ characterCount }}</span>
+      <div class="flex gap-2 items-center">
+        <span class="text-slate-500 font-medium">Characters:</span>
+        <span class="text-slate-900 font-semibold">{{ characterCount }}</span>
       </div>
-      <div class="status-item">
-        <span class="status-label">Lines:</span>
-        <span class="status-value">{{ lineCount }}</span>
+      <div class="flex gap-2 items-center">
+        <span class="text-slate-500 font-medium">Lines:</span>
+        <span class="text-slate-900 font-semibold">{{ lineCount }}</span>
       </div>
     </div>
   </div>
@@ -212,6 +265,13 @@ const lineCount = computed(() => {
   return text.split('\n').length
 })
 
+const toolbarButtonBaseClasses =
+  'px-2.5 py-1.5 rounded border border-transparent text-sm cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+const toolbarButtonInactiveClasses =
+  'bg-transparent text-slate-800 hover:bg-slate-200'
+const toolbarButtonActiveClasses =
+  'bg-blue-500 text-white border-blue-600 hover:bg-blue-600'
+
 // Clean up
 onBeforeUnmount(() => {
   editor.value?.destroy()
@@ -219,88 +279,28 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-.editor-container {
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  overflow: hidden;
-  background: white;
-}
-
-.toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  padding: 8px;
-  background: #f8fafc;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.toolbar-btn {
-  padding: 6px 12px;
-  border: 1px solid transparent;
-  background: transparent;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s;
-}
-
-.toolbar-btn:hover {
-  background: #e2e8f0;
-}
-
-.toolbar-btn.is-active {
-  background: #3b82f6;
-  color: white;
-  border-color: #2563eb;
-}
-
-.toolbar-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.separator {
-  width: 1px;
-  background: #cbd5e1;
-  margin: 0 4px;
-}
-
-.editor-content {
-  min-height: 300px;
-  padding: 16px;
-}
-
-.status-bar {
-  display: flex;
-  gap: 24px;
-  padding: 8px 16px;
-  background: #f8fafc;
-  border-top: 1px solid #e2e8f0;
-  font-size: 13px;
-}
-
-.status-item {
-  display: flex;
-  gap: 8px;
-}
-
-.status-label {
-  color: #64748b;
-  font-weight: 500;
-}
-
-.status-value {
-  color: #0f172a;
-  font-weight: 600;
-}
-
-/* Placeholder styling */
 :deep(.ProseMirror p.is-editor-empty:first-child::before) {
-  color: #adb5bd;
+  color: #94a3b8;
   content: attr(data-placeholder);
   float: left;
   height: 0;
   pointer-events: none;
+}
+
+/* Ensure lists render clearly inside the editor */
+:deep(.ProseMirror ul) {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin: 0.5rem 0;
+}
+
+:deep(.ProseMirror ol) {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin: 0.5rem 0;
+}
+
+:deep(.ProseMirror li) {
+  margin: 0.125rem 0;
 }
 </style>
