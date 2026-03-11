@@ -204,6 +204,52 @@
         <span class="text-slate-900 font-semibold">{{ lineCount }}</span>
       </div>
     </div>
+
+    <!-- JSON Export / Import -->
+    <div
+      v-if="editor"
+      class="px-4 py-3 bg-slate-50 border-t border-slate-200 text-xs space-y-2"
+    >
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-slate-500 font-medium">Document:</span>
+        <button
+          @click="saveToLocalStorage"
+          :class="[toolbarButtonBaseClasses, toolbarButtonInactiveClasses]"
+          type="button"
+        >
+          Save (Local Storage)
+        </button>
+        <button
+          @click="loadFromLocalStorage"
+          :class="[toolbarButtonBaseClasses, toolbarButtonInactiveClasses]"
+          type="button"
+        >
+          Load (Local Storage)
+        </button>
+        <span class="text-slate-400 mx-1">|</span>
+        <span class="text-slate-500 font-medium">JSON:</span>
+        <button
+          @click="exportJson"
+          :class="[toolbarButtonBaseClasses, toolbarButtonInactiveClasses]"
+          type="button"
+        >
+          Export
+        </button>
+        <button
+          @click="importJson"
+          :class="[toolbarButtonBaseClasses, toolbarButtonInactiveClasses]"
+          type="button"
+        >
+          Load from JSON
+        </button>
+      </div>
+      <textarea
+        v-model="jsonState"
+        class="w-full h-40 text-xs font-mono border border-slate-300 rounded p-2 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+        spellcheck="false"
+        placeholder="Exported document JSON will appear here. You can also paste JSON and click Load to restore a document."
+      ></textarea>
+    </div>
   </div>
 </template>
 
@@ -249,6 +295,55 @@ const editor = useEditor({
     emit('update:modelValue', editor.getHTML())
   },
 })
+
+// JSON state for export / import
+const jsonState = ref('')
+
+const LOCAL_STORAGE_KEY = 'rtcds-document-json'
+
+const exportJson = () => {
+  if (!editor.value) return
+  const json = editor.value.getJSON()
+  jsonState.value = JSON.stringify(json, null, 2)
+}
+
+const importJson = () => {
+  if (!editor.value) return
+  if (!jsonState.value.trim()) return
+  try {
+    const parsed = JSON.parse(jsonState.value)
+    editor.value.commands.setContent(parsed)
+  } catch (e) {
+    // Basic error feedback without breaking the app
+    window.alert('Invalid JSON: unable to load document state.')
+  }
+}
+
+const saveToLocalStorage = () => {
+  if (!editor.value) return
+  try {
+    const json = editor.value.getJSON()
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(json))
+    window.alert('Document saved to local storage.')
+  } catch (e) {
+    window.alert('Failed to save document to local storage.')
+  }
+}
+
+const loadFromLocalStorage = () => {
+  if (!editor.value) return
+  const saved = localStorage.getItem(LOCAL_STORAGE_KEY)
+  if (!saved) {
+    window.alert('No saved document found in local storage.')
+    return
+  }
+  try {
+    const parsed = JSON.parse(saved)
+    editor.value.commands.setContent(parsed)
+  } catch (e) {
+    window.alert('Saved document in local storage is invalid.')
+  }
+}
 
 // Document statistics
 const wordCount = computed(() => {
