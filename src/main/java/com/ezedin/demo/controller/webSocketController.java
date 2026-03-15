@@ -8,8 +8,8 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class webSocketController {
 
-    @MessageMapping("/app/edit")
-    @SendTo("my-topic")
+    @MessageMapping("/edit")
+    @SendTo("/topic/document")
     public documentEvent proccessor (documentEvent event){
         return event;
     }

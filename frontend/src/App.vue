@@ -254,13 +254,15 @@
 </template>
 
 <script setup>
-import { ref, computed, onBeforeUnmount } from 'vue'
+import { ref, computed, onBeforeUnmount, onMounted, watch } from 'vue'
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import TextAlign from '@tiptap/extension-text-align'
 import CharacterCount from '@tiptap/extension-character-count'
 import Placeholder from '@tiptap/extension-placeholder'
 import Underline from '@tiptap/extension-underline'
+import { useStateStore } from './stores/state'
+import { connectWebSocket, sendDocumentEvent, disconnectWebSocket } from './service/webSocketService'
 
 // Props
 const props = defineProps({
@@ -272,6 +274,9 @@ const props = defineProps({
 
 // Emits
 const emit = defineEmits(['update:modelValue'])
+
+// Global state
+const stateStore = useStateStore()
 
 // Initialize editor
 const editor = useEditor({
@@ -292,9 +297,44 @@ const editor = useEditor({
   ],
   onUpdate: ({ editor }) => {
     // Emit HTML content for v-model binding
-    emit('update:modelValue', editor.getHTML())
+    const html = editor.getHTML()
+    emit('update:modelValue', html)
+
+    // Update global state and notify backend about local changes
+    const event = {
+      id: stateStore.id,
+      content: html,
+    }
+    stateStore.documetEvent = event
+    sendDocumentEvent(event)
   },
 })
+
+// When backend pushes a new document event, update store and editor
+onMounted(() => {
+  connectWebSocket((event) => {
+    stateStore.id = event.id
+    stateStore.documetEvent = event
+
+    if (!editor.value || !event.content) return
+
+    // Avoid unnecessary updates and prevent feedback loops
+    if (editor.value.getHTML() !== event.content) {
+      editor.value.commands.setContent(event.content, false)
+    }
+  })
+})
+
+// Keep editor in sync if document event changes from elsewhere
+watch(
+  () => stateStore.documetEvent?.content,
+  (newContent) => {
+    if (!editor.value || !newContent) return
+    if (editor.value.getHTML() !== newContent) {
+      editor.value.commands.setContent(newContent, false)
+    }
+  }
+)
 
 // JSON state for export / import
 const jsonState = ref('')
@@ -370,6 +410,7 @@ const toolbarButtonActiveClasses =
 // Clean up
 onBeforeUnmount(() => {
   editor.value?.destroy()
+  disconnectWebSocket()
 })
 </script>
 
