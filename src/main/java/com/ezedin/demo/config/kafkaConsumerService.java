@@ -13,7 +13,6 @@ public class kafkaConsumerService {
 
     @KafkaListener(topics = "my-topic", groupId = "document-group")
     public void listen(documentEvent message) {
-        Long documentId = message.getDocumentID();
         // Forward Kafka message to the same STOMP destination used in webSocketController
         // so clients subscribed to "/topic/document" receive it.
         messagingTemplate.convertAndSend("/topic/document", message);

@@ -278,6 +278,9 @@ const emit = defineEmits(['update:modelValue'])
 // Global state
 const stateStore = useStateStore()
 
+// Track whether the current editor change came from the server
+let isRemoteUpdate = false
+
 // Initialize editor
 const editor = useEditor({
   content: props.modelValue,
@@ -296,14 +299,20 @@ const editor = useEditor({
     }),
   ],
   onUpdate: ({ editor }) => {
-    // Emit HTML content for v-model binding
-    const html = editor.getHTML()
-    emit('update:modelValue', html)
+    // If this update was triggered by a remote patch, don't echo it back
+    if (isRemoteUpdate) {
+      isRemoteUpdate = false
+      return
+    }
 
-    // Update global state and notify backend about local changes
+    // Emit plain-text content for v-model binding
+    const text = editor.getText()
+    emit('update:modelValue', text)
+
+    // Update global state and notify backend about local changes (plain text only)
     const event = {
       id: stateStore.id,
-      content: html,
+      content: text,
     }
     stateStore.documetEvent = event
     sendDocumentEvent(event)
@@ -319,7 +328,8 @@ onMounted(() => {
     if (!editor.value || !event.content) return
 
     // Avoid unnecessary updates and prevent feedback loops
-    if (editor.value.getHTML() !== event.content) {
+    if (editor.value.getText() !== event.content) {
+      isRemoteUpdate = true
       editor.value.commands.setContent(event.content, false)
     }
   })
@@ -330,7 +340,8 @@ watch(
   () => stateStore.documetEvent?.content,
   (newContent) => {
     if (!editor.value || !newContent) return
-    if (editor.value.getHTML() !== newContent) {
+    if (editor.value.getText() !== newContent) {
+      isRemoteUpdate = true
       editor.value.commands.setContent(newContent, false)
     }
   }

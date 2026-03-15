@@ -1,13 +1,13 @@
 package com.ezedin.demo.Document;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 
-@Getter
 @Data
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 public class documentEvent {
-    private Long documentID;
-
+    private Long id;
+    private String content;
 }
