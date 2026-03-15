@@ -13,6 +13,7 @@
     "format": "prettier --write --experimental-cli src/"
   },
   "dependencies": {
+    "@stomp/stompjs": "^7.3.0",
     "@tiptap/extension-character-count": "^3.20.1",
     "@tiptap/extension-placeholder": "^3.20.1",
     "@tiptap/extension-text-align": "^3.20.1",

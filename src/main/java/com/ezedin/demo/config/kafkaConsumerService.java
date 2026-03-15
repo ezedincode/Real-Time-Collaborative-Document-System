@@ -23,7 +23,11 @@ public class kafkaConsumerService {
         documentEvent message = objectMapper.readValue(value, documentEvent.class);
         System.out.println("Consumed message as documentEvent: " + message);
 
-        // Forward to WebSocket subscribers
-        messagingTemplate.convertAndSend("/topic/document", message);
+        if (message.getId() == null) {
+            return;
+        }
+
+        // Forward only to subscribers of the edited document.
+        messagingTemplate.convertAndSend("/topic/document/" + message.getId(), message);
     }
 }

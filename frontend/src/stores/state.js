@@ -2,12 +2,13 @@ import { defineStore} from 'pinia'
 import { ref } from 'vue'
 
 export const useStateStore = defineStore('state', () => {
-    const id = ref(0);
-    const documetEvent = ref({
+    const id = ref(0)
+    const documentEvent = ref({
         id: 0,
-        content: ""
+        content: '',
+        clientId: '',
     })
 
-    return { id, documetEvent }
+    return { id, documentEvent }
 })
    
