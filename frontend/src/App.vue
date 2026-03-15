@@ -278,6 +278,25 @@ const emit = defineEmits(['update:modelValue'])
 // Global state
 const stateStore = useStateStore()
 
+// Stable client identifier so we can ignore our own echoed events
+const clientId = (typeof crypto !== 'undefined' && crypto.randomUUID)
+  ? crypto.randomUUID()
+  : Math.random().toString(36).slice(2)
+
+// Helper to turn plain text into minimal HTML paragraphs for TipTap
+const escapeHtml = (str) =>
+  str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+
+const textToHtml = (text) => {
+  const lines = text.split('\n')
+  return lines
+    .map((line) => `<p>${escapeHtml(line)}</p>`)
+    .join('')
+}
+
 // Track whether the current editor change came from the server
 let isRemoteUpdate = false
 
@@ -313,6 +332,7 @@ const editor = useEditor({
     const event = {
       id: stateStore.id,
       content: text,
+      clientId,
     }
     stateStore.documetEvent = event
     sendDocumentEvent(event)
@@ -322,6 +342,11 @@ const editor = useEditor({
 // When backend pushes a new document event, update store and editor
 onMounted(() => {
   connectWebSocket((event) => {
+    // Ignore our own echoed events to avoid overwriting newer local text
+    if (event.clientId && event.clientId === clientId) {
+      return
+    }
+
     stateStore.id = event.id
     stateStore.documetEvent = event
 
@@ -330,7 +355,7 @@ onMounted(() => {
     // Avoid unnecessary updates and prevent feedback loops
     if (editor.value.getText() !== event.content) {
       isRemoteUpdate = true
-      editor.value.commands.setContent(event.content, false)
+      editor.value.commands.setContent(textToHtml(event.content), false)
     }
   })
 })
@@ -342,7 +367,7 @@ watch(
     if (!editor.value || !newContent) return
     if (editor.value.getText() !== newContent) {
       isRemoteUpdate = true
-      editor.value.commands.setContent(newContent, false)
+      editor.value.commands.setContent(textToHtml(newContent), false)
     }
   }
 )

@@ -10,4 +10,7 @@ import lombok.NoArgsConstructor;
 public class documentEvent {
     private Long id;
     private String content;
+    // Identify which client produced this event so that
+    // the same client can ignore its own echoed messages.
+    private String clientId;
 }
