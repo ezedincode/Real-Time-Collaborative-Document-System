@@ -27,7 +27,7 @@ public class document {
     private Long id;
     private String content;
 
-    @Column(name = "is_public", nullable = false)
+    @Column(name = "public_access", nullable = false)
     @Default
     private boolean publicAccess = false;
 

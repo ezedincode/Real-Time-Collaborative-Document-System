@@ -1,10 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
 
 const routes = [
   {
     path: '/login',
     name: 'login',
     component: () => import('../views/LoginView.vue'),
+    meta: { guestOnly: true },
   },
   {
     path: '/document/:id',
@@ -24,16 +26,19 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => {
-  const token = localStorage.getItem('rtcds-access-token')
+  const authStore = useAuthStore()
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
+  const guestOnly = to.matched.some((record) => record.meta.guestOnly)
+  const hasValidSession = authStore.hasValidSession()
 
-  if (to.meta.requiresAuth && !token) {
+  if (requiresAuth && !hasValidSession) {
     return {
       path: '/login',
       query: { redirect: to.fullPath },
     }
   }
 
-  if (to.path === '/login' && token) {
+  if (guestOnly && hasValidSession) {
     return '/document/new'
   }
 

@@ -32,6 +32,49 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem(USER_ID_KEY)
   }
 
+  function decodeJwtPayload(token) {
+    if (!token) {
+      return null
+    }
+
+    const tokenParts = token.split('.')
+    if (tokenParts.length < 2) {
+      return null
+    }
+
+    try {
+      const base64 = tokenParts[1].replace(/-/g, '+').replace(/_/g, '/')
+      const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, '=')
+      return JSON.parse(atob(padded))
+    } catch {
+      return null
+    }
+  }
+
+  function isTokenExpired(token) {
+    const payload = decodeJwtPayload(token)
+
+    if (!payload || typeof payload.exp !== 'number') {
+      return false
+    }
+
+    const nowInSeconds = Math.floor(Date.now() / 1000)
+    return payload.exp <= nowInSeconds
+  }
+
+  function hasValidSession() {
+    if (!accessToken.value) {
+      return false
+    }
+
+    if (isTokenExpired(accessToken.value)) {
+      clearAuth()
+      return false
+    }
+
+    return true
+  }
+
   async function requestAuth(path, payload) {
     const response = await fetch(`${API_BASE}${path}`, {
       method: 'POST',
@@ -107,6 +150,7 @@ export const useAuthStore = defineStore('auth', () => {
     username,
     userId,
     isAuthenticated,
+    hasValidSession,
     clearAuth,
     register,
     login,
