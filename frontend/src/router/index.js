@@ -15,6 +15,11 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/unauthorized',
+    name: 'unauthorized',
+    component: () => import('../views/UnauthorizedView.vue'),
+  },
+  {
     path: '/',
     redirect: '/document/new',
   },

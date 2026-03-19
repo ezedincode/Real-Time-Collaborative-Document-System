@@ -2,6 +2,7 @@ package com.ezedin.demo.Document;
 
 import com.ezedin.demo.user.AppUser;
 import com.ezedin.demo.user.AppUserRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,15 @@ public class documentService {
         }
 
         return found;
+    }
+
+    public List<DocumentSummary> listForUser(String username) {
+        AppUser owner = findUserByUsername(username);
+
+        return repository.findAllByOwnerIdOrderByIdDesc(owner.getId())
+                .stream()
+                .map(DocumentSummary::from)
+                .toList();
     }
 
     public documentEvent save(documentEvent newDocument, String username) {

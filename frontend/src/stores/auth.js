@@ -75,6 +75,13 @@ export const useAuthStore = defineStore('auth', () => {
     return true
   }
 
+  async function throwApiError(response, fallbackMessage) {
+    const message = await response.text()
+    const error = new Error(message || fallbackMessage)
+    error.status = response.status
+    throw error
+  }
+
   async function requestAuth(path, payload) {
     const response = await fetch(`${API_BASE}${path}`, {
       method: 'POST',
@@ -85,8 +92,7 @@ export const useAuthStore = defineStore('auth', () => {
     })
 
     if (!response.ok) {
-      const message = await response.text()
-      throw new Error(message || 'Authentication failed')
+      await throwApiError(response, 'Authentication failed')
     }
 
     const json = await response.json()
@@ -122,8 +128,7 @@ export const useAuthStore = defineStore('auth', () => {
     })
 
     if (!response.ok) {
-      const message = await response.text()
-      throw new Error(message || 'Failed to create document')
+      await throwApiError(response, 'Failed to create document')
     }
 
     return response.json()
@@ -138,8 +143,22 @@ export const useAuthStore = defineStore('auth', () => {
     })
 
     if (!response.ok) {
-      const message = await response.text()
-      throw new Error(message || 'Failed to load document')
+      await throwApiError(response, 'Failed to load document')
+    }
+
+    return response.json()
+  }
+
+  async function listDocuments() {
+    const response = await fetch(`${API_BASE}/api/documents`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken.value}`,
+      },
+    })
+
+    if (!response.ok) {
+      await throwApiError(response, 'Failed to load documents')
     }
 
     return response.json()
@@ -156,5 +175,6 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     createDocument,
     getDocument,
+    listDocuments,
   }
 })

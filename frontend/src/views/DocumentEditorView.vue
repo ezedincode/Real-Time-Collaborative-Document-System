@@ -249,13 +249,25 @@ function logout() {
   router.replace('/login')
 }
 
+function handleDocumentLoadError(err) {
+  if (err?.status === 403) {
+    router.replace({
+      path: '/unauthorized',
+      query: { from: route.fullPath },
+    })
+    return
+  }
+
+  authStore.clearAuth()
+  router.replace('/login')
+}
+
 onMounted(async () => {
   try {
     await initializeDocument()
     connectForCurrentDocument()
   } catch (err) {
-    authStore.clearAuth()
-    router.replace('/login')
+    handleDocumentLoadError(err)
   }
 })
 
@@ -267,8 +279,7 @@ watch(
       await initializeDocument()
       connectForCurrentDocument()
     } catch (err) {
-      authStore.clearAuth()
-      router.replace('/login')
+      handleDocumentLoadError(err)
     }
   }
 )

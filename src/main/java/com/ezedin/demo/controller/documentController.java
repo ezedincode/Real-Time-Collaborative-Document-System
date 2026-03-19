@@ -2,8 +2,10 @@ package com.ezedin.demo.controller;
 
 import com.ezedin.demo.Document.DocumentCreateRequest;
 import com.ezedin.demo.Document.DocumentResponse;
+import com.ezedin.demo.Document.DocumentSummary;
 import com.ezedin.demo.Document.document;
 import com.ezedin.demo.Document.documentService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -28,5 +30,10 @@ public class documentController {
     public DocumentResponse getDocument(@PathVariable Long id, Authentication authentication) {
         document doc = service.getAccessibleDocument(id, authentication.getName());
         return DocumentResponse.from(doc);
+    }
+
+    @GetMapping
+    public List<DocumentSummary> listDocuments(Authentication authentication) {
+        return service.listForUser(authentication.getName());
     }
 }
